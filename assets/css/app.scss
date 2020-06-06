@@ -104,7 +104,22 @@
 }
 
 .closed-square {
+    display: grid;
     background-color: darkSlateGray;
-    margin: 5px;
+    justify-content: center;
+    align-items: center;
+}
+
+.open-square {
+    display: grid;
+    background-color: cornsilk;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero {
+    background-color: mediumSeaGreen;
+    width: 5vw;
+    height: 5vw;
 }
 
