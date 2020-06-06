@@ -8,7 +8,8 @@ defmodule MinoaWeb.Maze do
   def render(assigns) do
     hero_square = Enum.random(1..100)
     ~L"""
-    <main class="maze">
+    <main>
+    <section class="maze">
     <%= for index <- 1..100 do %>
       <%= if Enum.random(0..1) == 1  do %>
         <div class="closed-square">
@@ -24,6 +25,15 @@ defmodule MinoaWeb.Maze do
         </div>
       <% end %>
     <% end %>
+    </section>
+    <section align="center">
+      <button phx-click="left">left</button>
+      <button phx-click="down">down</button>
+      <button phx-click="up">up</button>
+      <button phx-click="right">right</button>
+      <span></span>
+      <button phx-click="attack">attack</button>
+    </section>
     </main>
     """
   end
