@@ -94,16 +94,16 @@
 //----------------------------------------------------------------------
 
 
-.grid {
+.maze {
     display: grid;
-    grid-template-columns: repeat(8, 10vw);
-    grid-template-rows: repeat(8, 10vw);
+    grid-template-columns: repeat(10, 8vw);
+    grid-template-rows: repeat(10, 8vw);
     width: 80vw;
-    border: 3px solid 
+    border: 3px solid;
     margin: 0 auto;
 }
 
-.grid b {
+.closed-square {
     background-color: darkSlateGray;
     margin: 5px;
 }
