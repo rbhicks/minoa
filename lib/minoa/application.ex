@@ -12,9 +12,8 @@ defmodule Minoa.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Minoa.PubSub},
       # Start the Endpoint (http/https)
-      MinoaWeb.Endpoint
-      # Start a worker by calling: Minoa.Worker.start_link(arg)
-      # {Minoa.Worker, arg}
+      MinoaWeb.Endpoint,
+      Minoa.MazeServer
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
