@@ -17,7 +17,7 @@ defmodule MinoaWeb.Router do
   scope "/", MinoaWeb do
     pipe_through :browser
 
-    live "/", PageLive, :index
+    live("/", Maze)
   end
 
   # Other scopes may use custom stacks.
