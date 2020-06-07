@@ -123,41 +123,41 @@ defmodule Minoa.MazeServer do
   # end
 
   # defp get_next_coordinate(coordinate) do
-  #   [:north, :south, :east, :west]
+  #   [:up, :down, :right, :left]
   #   |> Enum.random()
   #   |> (&get_next_coordinate(coordinate, &1)).()
   # end
 
-  # defp get_next_coordinate(coordinate, :north) do
+  # defp get_next_coordinate(coordinate, :up) do
   #   if((coordinate |> elem(1)) == 1) do
-  #     # can't go north into the border, so head south
+  #     # can't go up into the border, so head down
   #     {(coordinate |> elem(0)), (coordinate |> elem(1) |> Kernel.+(1))}
   #   else
   #     {(coordinate |> elem(0)), (coordinate |> elem(1) |> Kernel.-(1))}
   #   end
   # end
 
-  # defp get_next_coordinate(coordinate, :south) do
+  # defp get_next_coordinate(coordinate, :down) do
   #   if((coordinate |> elem(1)) == 8) do
-  #     # can't go south into the border, so head north
+  #     # can't go down into the border, so head up
   #     {(coordinate |> elem(0)), (coordinate |> elem(1) |> Kernel.-(1))}
   #   else
   #     {(coordinate |> elem(0)), (coordinate |> elem(1) |> Kernel.+(1))}
   #   end
   # end
 
-  # defp get_next_coordinate(coordinate, :east) do
+  # defp get_next_coordinate(coordinate, :right) do
   #   if((coordinate |> elem(0)) == 8) do
-  #     # can't go east into the border, so head west
+  #     # can't go right into the border, so head left
   #     {(coordinate |> elem(0) |> Kernel.-(1)), (coordinate |> elem(1))}
   #   else
   #     {(coordinate |> elem(0) |> Kernel.+(1)), (coordinate |> elem(1))}
   #   end
   # end
 
-  # defp get_next_coordinate(coordinate, :west) do
+  # defp get_next_coordinate(coordinate, :left) do
   #   if((coordinate |> elem(0)) == 1) do
-  #     # can't go west into the border, so head east
+  #     # can't go left into the border, so head right
   #     {(coordinate |> elem(0) |> Kernel.+(1)), (coordinate |> elem(1))}
   #   else
   #     {(coordinate |> elem(0) |> Kernel.-(1)), (coordinate |> elem(1))}
