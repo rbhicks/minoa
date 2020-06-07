@@ -1,9 +1,35 @@
 defmodule MinoaWeb.Maze do
   use Phoenix.LiveView
 
+
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :maze, GenServer.call(:maze_server, :get_maze))}
+    {:ok, assign(socket,
+                 maze: GenServer.call(:maze_server, :get_maze),
+                 player_id: UUID.uuid1())}
   end
+
+  def handle_event(
+        "start",
+        %{"player_id" => _player_id,
+          "player_name" => _player_name},
+        %Phoenix.LiveView.Socket{assigns: %{pid: _pid}}=socket) do
+
+    {:noreply, socket}
+  end
+
+  def handle_event(
+        "start",
+        %{"player_id" => player_id},
+        socket) do
+
+    {:ok, pid} = Minoa.PlayerSupervisor.start_player(player_id)
+    {:noreply, assign(socket, pid: pid)}
+  end
+
+  def handle_event("left", _params, socket) do
+    {:noreply, socket}
+  end
+  
 
   def render(assigns) do
     ~L"""
@@ -17,6 +43,18 @@ defmodule MinoaWeb.Maze do
     <% end %>
     </section>
     <section align="center">
+      <form phx-submit="start" >
+        <input type="submit" value="start"/>
+        <input type="edit"
+               hidden=true
+               name="player_id"
+               value= <%= @player_id %> />
+        <input type="edit"
+               phx-value-player-id="zorg"
+               name="player_name"
+               value="jumpy monkey"/>
+      </form>
+      <span></span>
       <button phx-click="left">left</button>
       <button phx-click="down">down</button>
       <button phx-click="up">up</button>
