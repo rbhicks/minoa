@@ -13,7 +13,8 @@ defmodule Minoa.Application do
       {Phoenix.PubSub, name: Minoa.PubSub},
       # Start the Endpoint (http/https)
       MinoaWeb.Endpoint,
-      Minoa.MazeServer
+      Minoa.MazeServer,
+      Minoa.PlayerSupervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
