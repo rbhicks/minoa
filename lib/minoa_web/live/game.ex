@@ -26,16 +26,40 @@ defmodule MinoaWeb.Game do
     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
   
-  def handle_event("left", _params, socket) do
-    {:noreply, socket}
+  def handle_event("left",
+        _,
+        %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
+    GenServer.call(pid, {:move_player, "left"})
+    {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
+  end
+
+  def handle_event("down",
+        _,
+        %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
+    GenServer.call(pid, {:move_player, "down"})
+    {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
+  end
+
+  def handle_event("up",
+        _,
+        %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
+    GenServer.call(pid, {:move_player, "up"})
+    {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
+  end
+
+  def handle_event("right",
+        _,
+        %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
+    GenServer.call(pid, {:move_player, "right"})
+    {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
   
   def render(assigns) do
     ~L"""
     <main>
     <section class="maze">
-    <%= for x <- 0..9 do %>
-      <%= for y <- 0..9 do %>
+    <%= for y <- 0..9 do %>
+      <%= for x <- 0..9 do %>
         <div class="<%= get_square_class(@pid, @maze[x][y]) %>">
         </div>
       <% end %>
