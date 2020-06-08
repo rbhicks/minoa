@@ -5,7 +5,6 @@ defmodule MinoaWeb.Game do
   def mount(_params, _session, socket) do
     {:ok, assign(socket,
                  maze: GenServer.call(:maze_server, :get_maze),
-                 player_id: UUID.uuid1(),
                  pid: nil)}
   end
 
@@ -13,9 +12,21 @@ defmodule MinoaWeb.Game do
         "start",
         %{"player_name" => player_name},
         %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
-    {:ok, pid} = Minoa.PlayerSupervisor.start_player(player_name)
-    GenServer.call(pid, :place_player_randomly)
-    {:noreply, assign(socket, pid: pid, maze: GenServer.call(:maze_server, :get_maze))}
+    if(GenServer.whereis({:global, player_name})) do
+      {:noreply,
+       assign(
+         socket,
+         pid: GenServer.whereis({:global, player_name}),
+         maze: GenServer.call(:maze_server, :get_maze))}
+    else
+      {:ok, pid} = Minoa.PlayerSupervisor.start_player(player_name)
+      GenServer.call(pid, :place_player_randomly)
+      {:noreply,
+       assign(
+         socket,
+         pid: pid,
+         maze: GenServer.call(:maze_server, :get_maze))}
+    end
   end
 
   def handle_event(

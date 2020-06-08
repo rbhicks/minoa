@@ -2,12 +2,12 @@ defmodule Minoa.Player do
   use GenServer
 
 
-  def start_link(id) do
-    GenServer.start_link(__MODULE__, id, name: {:global, "player:#{id}"})
+  def start_link(player_name) do
+    GenServer.start_link(__MODULE__, player_name, name: {:global, player_name})
   end
 
-  def init(id) do
-    {:ok, %{pid: self(), id: id, position: {}}}
+  def init(player_name) do
+    {:ok, %{pid: self(), player_name: player_name, position: {}}}
   end
 
   def handle_call(
