@@ -5,15 +5,11 @@ defmodule Minoa.MazeServer do
   use GenServer
 
 
-  #
-  # GenServer Callbacks
-  #
-
   def start_link(_args) do
     GenServer.start_link(__MODULE__, [], name: :maze_server)
   end
 
-  def init(_args) do    
+  def init(_args) do
     {:ok, generate_maze()}
   end
 
@@ -21,13 +17,29 @@ defmodule Minoa.MazeServer do
     {:reply, maze, maze}
   end
 
-  def handle_call(:get_random_position, _from, maze) do
+  def handle_call(:get_random_open_square, _from, maze) do
     {:reply, get_random_open_square(), maze}
   end
 
-  #
-  # implementation
-  #
+  def handle_call(
+        {:update_player_position, {{}, {x, y}, pid}},
+        _from,
+        maze) do
+
+    
+    {:reply, {x, y}, put_in(maze[x][y], "hero" )}
+  end
+
+  def handle_call(
+        {:update_player_position,
+         {{previous_x, previous_y}, {x, y}, pid}},
+        _from,
+        maze) do
+
+    maze = put_in(maze[previous_x][previous_y], "open-square")
+    
+    {:reply, {x, y}, put_in(maze[x][y], "hero")}
+  end
 
   defp generate_maze() do
     Enum.reduce(0..9, %{}, fn y, maze ->
