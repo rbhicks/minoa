@@ -34,5 +34,77 @@ defmodule Minoa.Player do
        {:update_player_position,
         {{previous_x, previous_y}, {x, y}, pid}}),
      Map.put(state, :position, {x, y})}
-  end  
+  end
+
+  def handle_call(
+        {:move_player, "left"},
+        _from,
+        %{pid: pid,
+          position: {previous_x, previous_y}}=state) do
+    if(GenServer.call(:maze_server,
+          {:closed_square?, {previous_x - 1, previous_y}})) do
+      {:reply, {previous_x, previous_y}, state}
+    else
+      {:reply,
+       GenServer.call(
+         :maze_server,
+         {:update_player_position,
+          {{previous_x, previous_y}, {previous_x - 1, previous_y}, pid}}),
+       Map.put(state, :position, {previous_x - 1, previous_y})}
+    end
+  end
+
+  def handle_call(
+        {:move_player, "down"},
+        _from,
+        %{pid: pid,
+          position: {previous_x, previous_y}}=state) do
+    if(GenServer.call(:maze_server,
+          {:closed_square?, {previous_x, previous_y + 1}})) do
+      {:reply, {previous_x, previous_y}, state}
+    else
+        {:reply,
+         GenServer.call(
+           :maze_server,
+           {:update_player_position,
+            {{previous_x, previous_y}, {previous_x, previous_y + 1}, pid}}),
+         Map.put(state, :position, {previous_x, previous_y + 1})}
+    end
+  end
+
+  def handle_call(
+        {:move_player, "up"},
+        _from,
+        %{pid: pid,
+          position: {previous_x, previous_y}}=state) do
+    if(GenServer.call(:maze_server,
+          {:closed_square?, {previous_x, previous_y - 1}})) do
+      {:reply, {previous_x, previous_y}, state}
+    else
+        {:reply,
+         GenServer.call(
+           :maze_server,
+           {:update_player_position,
+            {{previous_x, previous_y}, {previous_x, previous_y - 1}, pid}}),
+         Map.put(state, :position, {previous_x, previous_y - 1})}
+    end
+  end
+
+  def handle_call(
+        {:move_player, "right"},
+        _from,
+        %{pid: pid,
+          position: {previous_x, previous_y}}=state) do
+    if(GenServer.call(:maze_server,
+          {:closed_square?, {previous_x + 1, previous_y}})) do
+      {:reply, {previous_x, previous_y}, state}
+    else
+        {:reply,
+         GenServer.call(
+           :maze_server,
+           {:update_player_position,
+            {{previous_x, previous_y}, {previous_x + 1, previous_y}, pid}}),
+         Map.put(state, :position, {previous_x + 1, previous_y})}
+    end
+  end
 end
