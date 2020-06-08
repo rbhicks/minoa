@@ -21,6 +21,14 @@ defmodule Minoa.MazeServer do
     {:reply, get_random_open_square(), maze}
   end
 
+  def handle_call({:get_enemy_pid, {x, y}}, _from, maze) do
+    if maze[x][y] |> is_pid()  do
+      {:reply, maze[x][y], maze}
+    else
+      {:reply, nil, maze}
+    end
+  end
+  
   def handle_call(
         {:remove_player, {x, y}}, _from, maze) do
     {:reply, maze, put_in(maze[x][y], "open-square")}
@@ -97,5 +105,5 @@ defmodule Minoa.MazeServer do
          7 -> {7, 1..8 |> Enum.to_list |> Kernel.--([4]) |> Enum.random}
          8 -> {8, 1..8 |> Enum.random}
        end    
-  end
+  end    
 end
