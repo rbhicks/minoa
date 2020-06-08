@@ -22,6 +22,11 @@ defmodule Minoa.MazeServer do
   end
 
   def handle_call(
+        {:remove_player, {x, y}}, _from, maze) do
+    {:reply, maze, put_in(maze[x][y], "open-square")}
+  end
+  
+  def handle_call(
         {:update_player_position, {{}, {x, y}, pid}},
         _from,
         maze) do
