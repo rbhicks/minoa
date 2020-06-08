@@ -35,9 +35,9 @@ defmodule MinoaWeb.Maze do
     ~L"""
     <main>
     <section class="maze">
-    <%= for i <- 0..9 do %>
-      <%= for j <- 0..9 do %>
-        <div class="<%= @maze[i][j] %>">
+    <%= for x <- 0..9 do %>
+      <%= for y <- 0..9 do %>
+        <div class="<%= @maze[x][y] %>">
         </div>
       <% end %>
     <% end %>
