@@ -21,147 +21,60 @@ defmodule Minoa.MazeServer do
     {:reply, maze, maze}
   end
 
+  def handle_call(:get_random_position, _from, maze) do
+    {:reply, get_random_open_square(), maze}
+  end
+
   #
   # implementation
   #
 
   defp generate_maze() do
-    make_solid_grid()
-    |> carve_grid_into_maze()
-  end
-
-  defp make_solid_grid() do
-    Enum.reduce(0..9, %{}, fn i, maze ->
+    Enum.reduce(0..9, %{}, fn y, maze ->
       Map.put(
         maze,
-        i,
-        Enum.reduce(0..9, %{}, fn j, row ->
-          Map.put(row, j, "closed-square")
+        y,
+        Enum.reduce(0..9, %{}, fn x, row ->
+          Map.put(
+            row,
+            x,
+            get_square_type(x, y))
         end))
     end)
   end
 
-  defp carve_grid_into_maze(solid_grid) do
-    open_square(solid_grid, 1, 1)    
-    |> open_square(1, 2)
-    |> open_square(1, 3)
-    |> open_square(1, 4)
-    |> open_square(1, 5)
-    |> open_square(1, 6)
-    |> open_square(1, 7)
-    |> open_square(1, 8)
-    |> open_square(2, 1)
-    |> open_square(2, 2)
-    |> open_square(2, 3)
-    |> open_square(2, 4)
-    |> open_square(2, 5)
-    |> open_square(2, 6)
-    |> open_square(2, 7)
-    |> open_square(2, 8)
-    |> open_square(3, 1)
-    |> open_square(3, 2)
-    |> open_square(3, 3)
-    |> open_square(3, 4)
-    |> open_square(3, 5)
-    |> open_square(3, 6)
-    |> open_square(3, 7)
-    |> open_square(3, 8)
-    |> open_square(4, 2)
-    |> open_square(4, 7)
-    |> open_square(4, 8)
-    |> open_square(5, 1)
-    |> open_square(5, 2)
-    |> open_square(5, 3)
-    |> open_square(5, 5)
-    |> open_square(5, 6)
-    |> open_square(5, 7)
-    |> open_square(5, 8)
-    |> open_square(6, 1)
-    |> open_square(6, 2)
-    |> open_square(6, 3)
-    |> open_square(6, 5)
-    |> open_square(6, 6)
-    |> open_square(6, 7)
-    |> open_square(6, 8)
-    |> open_square(7, 1)
-    |> open_square(7, 2)
-    |> open_square(7, 3)
-    |> open_square(7, 5)
-    |> open_square(7, 6)
-    |> open_square(7, 7)
-    |> open_square(7, 8)
-    |> open_square(8, 1)
-    |> open_square(8, 2)
-    |> open_square(8, 3)
-    |> open_square(8, 4)
-    |> open_square(8, 5)
-    |> open_square(8, 6)
-    |> open_square(8, 7)
-    |> open_square(8, 8)
+  defp get_square_type(x, y) do    
+    if(closed_square?(x, y)) do
+      "closed-square"
+    else
+      "open-square"
+    end
   end
 
-  defp open_square(maze, i, j) do
-    put_in(maze[i][j], "open-square")
+  defp closed_square?(x, y) do
+    cond do
+      x == 0 -> true
+      x == 9 -> true
+      y == 0 -> true
+      y == 9 -> true
+      x == 1 && y == 4 -> true
+      x > 2 && x < 7 && y == 4 -> true
+      x == 4 && y > 4 && y < 8 -> true
+      true -> false
+    end
   end
-  
-  # defp carve_grid_into_maze(solid_grid) do
-  #   carve_grid_into_maze(
-  #     solid_grid,
-  #     {Enum.random(1..8), Enum.random(1..8)},
-  #     MapSet.new())
-  # end
 
-  # defp carve_grid_into_maze(maze, coordinate, visited_squares) do
-  #   if((visited_squares |> MapSet.size()) < 64) do
-  #     carve_grid_into_maze(
-  #       put_in(maze[(coordinate |> elem(0))][(coordinate |> elem(1))], "open-square"),
-  #       get_next_coordinate(coordinate),
-  #       MapSet.put(visited_squares, coordinate))
-  #   else
-  #     maze
-  #   end
-  # end
-
-  # defp get_next_coordinate(coordinate) do
-  #   [:up, :down, :right, :left]
-  #   |> Enum.random()
-  #   |> (&get_next_coordinate(coordinate, &1)).()
-  # end
-
-  # defp get_next_coordinate(coordinate, :up) do
-  #   if((coordinate |> elem(1)) == 1) do
-  #     # can't go up into the border, so head down
-  #     {(coordinate |> elem(0)), (coordinate |> elem(1) |> Kernel.+(1))}
-  #   else
-  #     {(coordinate |> elem(0)), (coordinate |> elem(1) |> Kernel.-(1))}
-  #   end
-  # end
-
-  # defp get_next_coordinate(coordinate, :down) do
-  #   if((coordinate |> elem(1)) == 8) do
-  #     # can't go down into the border, so head up
-  #     {(coordinate |> elem(0)), (coordinate |> elem(1) |> Kernel.-(1))}
-  #   else
-  #     {(coordinate |> elem(0)), (coordinate |> elem(1) |> Kernel.+(1))}
-  #   end
-  # end
-
-  # defp get_next_coordinate(coordinate, :right) do
-  #   if((coordinate |> elem(0)) == 8) do
-  #     # can't go right into the border, so head left
-  #     {(coordinate |> elem(0) |> Kernel.-(1)), (coordinate |> elem(1))}
-  #   else
-  #     {(coordinate |> elem(0) |> Kernel.+(1)), (coordinate |> elem(1))}
-  #   end
-  # end
-
-  # defp get_next_coordinate(coordinate, :left) do
-  #   if((coordinate |> elem(0)) == 1) do
-  #     # can't go left into the border, so head right
-  #     {(coordinate |> elem(0) |> Kernel.+(1)), (coordinate |> elem(1))}
-  #   else
-  #     {(coordinate |> elem(0) |> Kernel.-(1)), (coordinate |> elem(1))}
-  #   end
-  # end
-  
+  defp get_random_open_square() do
+    Enum.random(1..8)
+    |> case do
+         1 -> {1, 1..8 |> Enum.random}
+         2 -> {2, 1..8 |> Enum.random}
+         3 -> {3, 1..8 |> Enum.random}
+         4 -> {4, 1..8 |> Enum.to_list |> Kernel.--([1, 3, 4, 5, 6]) |> Enum.random}
+         5 -> {5, 1..8 |> Enum.to_list |> Kernel.--([4]) |> Enum.random}
+         6 -> {6, 1..8 |> Enum.to_list |> Kernel.--([4]) |> Enum.random}
+         7 -> {7, 1..8 |> Enum.to_list |> Kernel.--([4]) |> Enum.random}
+         8 -> {8, 1..8 |> Enum.random}
+       end    
+  end
 end
