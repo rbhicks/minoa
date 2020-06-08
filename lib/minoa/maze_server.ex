@@ -37,15 +37,23 @@ defmodule Minoa.MazeServer do
     {:reply, {x, y}, put_in(maze[x][y], pid)}
   end
 
+  def handle_call(
+        {:closed_square?,
+         {x, y}},
+        _from,
+        maze) do
+    {:reply, closed_square?(x, y), maze}
+  end
+
   defp generate_maze() do
-    Enum.reduce(0..9, %{}, fn y, maze ->
+    Enum.reduce(0..9, %{}, fn x, maze ->
       Map.put(
         maze,
-        y,
-        Enum.reduce(0..9, %{}, fn x, row ->
+        x,
+        Enum.reduce(0..9, %{}, fn y, column ->
           Map.put(
-            row,
-            x,
+            column,
+            y,
             get_square_type(x, y))
         end))
     end)
