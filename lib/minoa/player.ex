@@ -107,4 +107,22 @@ defmodule Minoa.Player do
          Map.put(state, :position, {previous_x + 1, previous_y})}
     end
   end
+
+  def handle_call(
+        :get_position,
+        _from,
+        %{position: {x, y}}=state) do
+    {:reply, {x, y}, state}
+  end
+
+  def handle_call(
+        :kill_player,
+        _from,
+        %{position: {x, y}}=state) do    
+    {:reply,
+     GenServer.call(
+       :maze_server,
+       {:remove_player, {x, y}}),
+     Map.put(state, :position, {})}
+  end
 end
