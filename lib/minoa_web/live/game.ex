@@ -53,6 +53,21 @@ defmodule MinoaWeb.Game do
     GenServer.call(pid, {:move_player, "right"})
     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
+
+  def handle_event("attack",
+        _,
+        %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
+    pid
+    |> GenServer.call(:get_position)
+    |> get_squares_within_attack_range()
+    |> Enum.each(fn target_coordinates ->
+      if GenServer.call(:maze_server, {:get_enemy_pid, target_coordinates}) |> is_pid() do
+        GenServer.call(:maze_server, {:get_enemy_pid, target_coordinates})
+        |> GenServer.call(:kill_player)        
+      end      
+    end)
+    {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
+  end
   
   def render(assigns) do
     ~L"""
@@ -99,4 +114,36 @@ defmodule MinoaWeb.Game do
 
   defp get_square_class(nil, class_determinant), do: class_determinant
   defp get_square_class(_pid, class_determinant), do: class_determinant
+
+  defp get_squares_within_attack_range(coordinates) do
+    get_surrounding_deltas()
+    |> Enum.reduce([], fn deltas, squares_within_attack_range ->
+      if GenServer.call(:maze_server,
+                        {:closed_square?,
+                        translate_coordinates(coordinates, deltas)}) do
+        squares_within_attack_range
+      else
+        squares_within_attack_range ++ [translate_coordinates(coordinates, deltas)]
+      end
+    end)
+  end
+
+  defp get_surrounding_deltas() do
+    [
+      {0,  -1},
+      {1,  -1},
+      {1,   0},
+      {1,   1},
+      {0,   1},
+      {-1,  1},
+      {-1,  0},
+      {-1, -1}
+    ]
+  end
+
+  defp translate_coordinates(coordinates, deltas) do
+    {coordinates |> elem(0) |> Kernel.+(deltas |> elem(0)),
+     coordinates |> elem(1) |> Kernel.+(deltas |> elem(1))}
+  end
+  
 end
