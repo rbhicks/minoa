@@ -27,7 +27,7 @@ defmodule Minoa.MazeServer do
         maze) do
 
     
-    {:reply, {x, y}, put_in(maze[x][y], "hero" )}
+    {:reply, {x, y}, put_in(maze[x][y], pid )}
   end
 
   def handle_call(
@@ -38,7 +38,7 @@ defmodule Minoa.MazeServer do
 
     maze = put_in(maze[previous_x][previous_y], "open-square")
     
-    {:reply, {x, y}, put_in(maze[x][y], "hero")}
+    {:reply, {x, y}, put_in(maze[x][y], pid)}
   end
 
   defp generate_maze() do
