@@ -17,6 +17,6 @@ defmodule MinoaWeb.Router do
   scope "/", MinoaWeb do
     pipe_through :browser
 
-    live "/", Maze
+    live "/", Game
   end
 end
