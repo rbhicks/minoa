@@ -31,14 +31,14 @@ defmodule Minoa.MazeServer do
   
   def handle_call(
         {:remove_player, {x, y}}, _from, maze) do
-    {:reply, maze, put_in(maze[x][y], "open-square")}
+    {:reply, maze, put_in(maze[x][y], maze[x][y] |> tl())}
   end
   
   def handle_call(
         {:update_player_position, {{}, {x, y}, pid}},
         _from,
         maze) do
-    {:reply, {x, y}, put_in(maze[x][y], pid )}
+    {:reply, {x, y}, put_in(maze[x][y], [pid| maze[x][y]])}
   end
 
   def handle_call(
@@ -46,8 +46,8 @@ defmodule Minoa.MazeServer do
          {{previous_x, previous_y}, {x, y}, pid}},
         _from,
         maze) do
-    maze = put_in(maze[previous_x][previous_y], "open-square")
-    {:reply, {x, y}, put_in(maze[x][y], pid)}
+    maze = put_in(maze[previous_x][previous_y], maze[previous_x][previous_y] |> tl())
+    {:reply, {x, y}, put_in(maze[x][y], [pid| maze[x][y]])}
   end
 
   def handle_call(
@@ -67,7 +67,7 @@ defmodule Minoa.MazeServer do
           Map.put(
             column,
             y,
-            get_square_type(x, y))
+            [get_square_type(x, y)])
         end))
     end)
   end

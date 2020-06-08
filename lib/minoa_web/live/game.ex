@@ -75,7 +75,7 @@ defmodule MinoaWeb.Game do
     <section class="maze">
     <%= for y <- 0..9 do %>
       <%= for x <- 0..9 do %>
-        <div class="<%= get_square_class(@pid, @maze[x][y]) %>">
+        <div class="<%= get_square_class(@pid, @maze[x][y] |> hd()) %>">
         </div>
       <% end %>
     <% end %>
