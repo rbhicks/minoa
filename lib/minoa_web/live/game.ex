@@ -11,9 +11,9 @@ defmodule MinoaWeb.Game do
 
   def handle_event(
         "start",
-        %{"player_id" => player_id},
+        %{"player_name" => player_name},
         %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
-    {:ok, pid} = Minoa.PlayerSupervisor.start_player(player_id)
+    {:ok, pid} = Minoa.PlayerSupervisor.start_player(player_name)
     GenServer.call(pid, :place_player_randomly)
     {:noreply, assign(socket, pid: pid, maze: GenServer.call(:maze_server, :get_maze))}
   end
@@ -83,10 +83,6 @@ defmodule MinoaWeb.Game do
     <section align="center">
       <form phx-submit="start" >
         <input type="submit" value="start"/>
-        <input type="edit"
-               hidden=true
-               name="player_id"
-               value= <%= @player_id %> />
         <input type="edit"
                name="player_name"
                value="<%= Faker.Commerce.product_name() %>"/>
