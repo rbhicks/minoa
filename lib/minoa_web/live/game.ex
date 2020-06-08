@@ -1,4 +1,4 @@
-defmodule MinoaWeb.Maze do
+defmodule MinoaWeb.Game do
   use Phoenix.LiveView
 
 
@@ -12,18 +12,18 @@ defmodule MinoaWeb.Maze do
         "start",
         %{"player_id" => _player_id,
           "player_name" => _player_name},
-        %Phoenix.LiveView.Socket{assigns: %{pid: _pid}}=socket) do
-
-    {:noreply, socket}
+        %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
+    GenServer.call(pid, :place_player_randomly)
+    {:noreply, assign(socket, pid: pid, maze: GenServer.call(:maze_server, :get_maze))}
   end
 
   def handle_event(
         "start",
         %{"player_id" => player_id},
         socket) do
-
     {:ok, pid} = Minoa.PlayerSupervisor.start_player(player_id)
-    {:noreply, assign(socket, pid: pid)}
+    GenServer.call(pid, :place_player_randomly)
+    {:noreply, assign(socket, pid: pid, maze: GenServer.call(:maze_server, :get_maze))}
   end
 
   def handle_event("left", _params, socket) do
