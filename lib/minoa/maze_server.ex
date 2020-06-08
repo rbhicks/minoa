@@ -22,8 +22,8 @@ defmodule Minoa.MazeServer do
   end
 
   def handle_call({:get_enemy_pid, {x, y}}, _from, maze) do
-    if maze[x][y] |> is_pid()  do
-      {:reply, maze[x][y], maze}
+    if maze[x][y] |> hd() |> is_pid()  do
+      {:reply, maze[x][y] |> hd(), maze}
     else
       {:reply, nil, maze}
     end
