@@ -25,8 +25,6 @@ defmodule Minoa.MazeServer do
         {:update_player_position, {{}, {x, y}, pid}},
         _from,
         maze) do
-
-    
     {:reply, {x, y}, put_in(maze[x][y], pid )}
   end
 
@@ -35,9 +33,7 @@ defmodule Minoa.MazeServer do
          {{previous_x, previous_y}, {x, y}, pid}},
         _from,
         maze) do
-
     maze = put_in(maze[previous_x][previous_y], "open-square")
-    
     {:reply, {x, y}, put_in(maze[x][y], pid)}
   end
 
