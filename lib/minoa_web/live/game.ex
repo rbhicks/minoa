@@ -88,9 +88,8 @@ defmodule MinoaWeb.Game do
                name="player_id"
                value= <%= @player_id %> />
         <input type="edit"
-               phx-value-player-id="zorg"
                name="player_name"
-               value="jumpy monkey"/>
+               value="<%= Faker.Commerce.product_name() %>"/>
       </form>
       <span></span>
       <button phx-click="left">left</button>
