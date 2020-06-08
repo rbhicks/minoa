@@ -17,7 +17,8 @@ defmodule MinoaWeb.Game do
        assign(
          socket,
          pid: GenServer.whereis({:global, player_name}),
-         maze: GenServer.call(:maze_server, :get_maze))}
+         maze: GenServer.call(:maze_server, :get_maze),
+         player_name: player_name)}
     else
       {:ok, pid} = Minoa.PlayerSupervisor.start_player(player_name)
       GenServer.call(pid, :place_player_randomly)
@@ -25,7 +26,8 @@ defmodule MinoaWeb.Game do
        assign(
          socket,
          pid: pid,
-         maze: GenServer.call(:maze_server, :get_maze))}
+         maze: GenServer.call(:maze_server, :get_maze),
+         player_name: player_name)}
     end
   end
 
