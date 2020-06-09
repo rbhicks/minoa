@@ -84,7 +84,7 @@ defmodule MinoaWeb.Game do
     |> Enum.each(fn target_coordinates ->
       if GenServer.call(:maze_server, {:get_enemy_pid, target_coordinates}) |> is_pid() do
         GenServer.call(:maze_server, {:get_enemy_pid, target_coordinates})
-        |> GenServer.call(:kill_player)        
+        |> GenServer.cast({:kill_player, @topic})
       end      
     end)
     MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})

@@ -115,14 +115,22 @@ defmodule Minoa.Player do
     {:reply, {x, y}, state}
   end
 
-  def handle_call(
-        :kill_player,
-        _from,
-        %{position: {x, y}}=state) do    
-    {:reply,
-     GenServer.call(
+  def handle_cast({:kill_player, topic},
+                  %{pid: pid, position: {x, y}}=state) do
+    GenServer.call(
+      :maze_server,
+      {:remove_player, {x, y}})
+
+    Process.sleep(5000)
+
+    {new_x, new_y} = GenServer.call(:maze_server, :get_random_open_square)
+
+    GenServer.call(
        :maze_server,
-       {:remove_player, {x, y}}),
-     Map.put(state, :position, {})}
+       {:update_player_position, {{}, {new_x, new_y}, pid}})
+
+    MinoaWeb.Endpoint.broadcast_from(self(), topic, "update_board", %{})
+
+    {:noreply, Map.put(state, :position, {new_x, new_y})}
   end
 end
