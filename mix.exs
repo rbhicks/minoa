@@ -44,7 +44,9 @@ defmodule Minoa.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:faker, "~> 0.13"}
+      {:faker, "~> 0.13"},  # this is used in the actual logic, so it's not restricted to test
+      {:ex_spec, "~> 2.0", only: :test},
+      {:plumbing, "~> 0.1.0"}
     ]
   end
 
