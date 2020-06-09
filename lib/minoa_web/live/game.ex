@@ -127,12 +127,21 @@ defmodule MinoaWeb.Game do
   end
   
   def render(assigns) do
+    coordinates_names = DynamicSupervisor.which_children(Minoa.PlayerSupervisor)
+    |> Enum.reduce(%{}, fn {_, pid, _, _}, acc ->
+      Map.put(
+        acc,
+        GenServer.call(pid, :get_position),
+        GenServer.call(pid, :get_player_name))
+    end)
+    
     ~L"""
     <main>
     <section class="maze">
     <%= for y <- 0..9 do %>
       <%= for x <- 0..9 do %>
         <div class="<%= get_square_class(@pid, @maze[x][y] |> hd()) %>">
+          <%= Map.get(coordinates_names, {x, y}, "") %>
         </div>
       <% end %>
     <% end %>
