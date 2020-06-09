@@ -115,6 +115,13 @@ defmodule Minoa.Player do
     {:reply, {x, y}, state}
   end
 
+  def handle_call(
+        :get_player_name,
+        _from,
+        %{player_name: player_name}=state) do
+    {:reply, player_name, state}
+  end
+
   def handle_cast({:kill_player, topic},
                   %{pid: pid, position: {x, y}}=state) do
     GenServer.call(
