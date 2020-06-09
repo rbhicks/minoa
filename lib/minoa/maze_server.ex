@@ -24,14 +24,14 @@ defmodule Minoa.MazeServer do
     {:reply, maze, maze}
   end
 
-  def handle_call(:get_random_open_unoccupied_square, _from, maze) do
-    {:reply, get_random_open_unoccupied_square(maze), maze}
+  def handle_call(:get_random_open_square, _from, maze) do
+    {:reply, get_random_open_square(), maze}
   end
 
-  # there might not be one, but returning nil when there isn't
+  # there might not be one, but returning [] when there isn't
   # allows us to only check the surrounding squares
-  def handle_call({:get_enemy_pid, {x, y}}, _from, maze) do
-    {:reply, get_enemy_pid(x, y, maze), maze}
+  def handle_call({:get_enemy_pids, pid, {x, y}}, _from, maze) do    
+    {:reply, get_enemy_pids(x, y, maze, pid), maze}
   end
   
   def handle_call(
@@ -98,35 +98,28 @@ defmodule Minoa.MazeServer do
     end
   end
 
-  defp get_random_open_unoccupied_square(maze) do
+  defp get_random_open_square do
     Enum.random(1..8)
     |> case do
-         1 -> {1, 1..8 |> Enum.to_list |> Kernel.--(get_occupied_column_numbers_for_row(1, maze) ++ [4]) |> Enum.random}
-         2 -> {2, 1..8 |> Enum.to_list |> Kernel.--(get_occupied_column_numbers_for_row(2, maze)) |> Enum.random}
-         3 -> {3, 1..8 |> Enum.to_list |> Kernel.--(get_occupied_column_numbers_for_row(3, maze) ++ [4]) |> Enum.random}
-         4 -> {4, 1..8 |> Enum.to_list |> Kernel.--(get_occupied_column_numbers_for_row(4, maze) ++ [4, 5, 6, 7]) |> Enum.random}
-         5 -> {5, 1..8 |> Enum.to_list |> Kernel.--(get_occupied_column_numbers_for_row(5, maze) ++ [4]) |> Enum.random}
-         6 -> {6, 1..8 |> Enum.to_list |> Kernel.--(get_occupied_column_numbers_for_row(6, maze) ++ [4]) |> Enum.random}
-         7 -> {7, 1..8 |> Enum.to_list |> Kernel.--(get_occupied_column_numbers_for_row(7, maze)) |> Enum.random}
-         8 -> {8, 1..8 |> Enum.to_list |> Kernel.--(get_occupied_column_numbers_for_row(8, maze)) |> Enum.random}
+         1 -> {1, 1..8 |> Enum.to_list |> Kernel.--([4]) |> Enum.random}
+         2 -> {2, 1..8 |> Enum.to_list |> Enum.random}
+         3 -> {3, 1..8 |> Enum.to_list |> Kernel.--([4]) |> Enum.random}
+         4 -> {4, 1..8 |> Enum.to_list |> Kernel.--([4, 5, 6, 7]) |> Enum.random}
+         5 -> {5, 1..8 |> Enum.to_list |> Kernel.--([4]) |> Enum.random}
+         6 -> {6, 1..8 |> Enum.to_list |> Kernel.--([4]) |> Enum.random}
+         7 -> {7, 1..8 |> Enum.to_list |> Enum.random}
+         8 -> {8, 1..8 |> Enum.to_list |> Enum.random}
        end
   end
 
-  defp get_occupied_column_numbers_for_row(row_number, maze) do
-    Enum.reduce(1..8, [], fn column_number, acc ->
-      if( get_enemy_pid(row_number, column_number, maze)) do
-        [column_number|acc]
-      else
-        acc
+  defp get_enemy_pids(x, y, maze, player_pid) do
+    maze[x][y]
+    |> Enum.map(fn square_status ->
+      if(square_status |> is_pid()) do
+        unless square_status == player_pid do
+          square_status
+        end
       end
-    end)    
-  end
-
-  defp get_enemy_pid(x, y, maze) do
-    if maze[x][y] |> hd() |> is_pid()  do
-      maze[x][y] |> hd()
-    else
-      nil
-    end
+    end)
   end
 end

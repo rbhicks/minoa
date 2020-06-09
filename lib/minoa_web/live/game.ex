@@ -112,10 +112,18 @@ defmodule MinoaWeb.Game do
     |> GenServer.call(:get_position)
     |> get_squares_within_attack_range()
     |> Enum.each(fn target_coordinates ->
-      if GenServer.call(:maze_server, {:get_enemy_pid, target_coordinates}) |> is_pid() do
-          GenServer.call(:maze_server, {:get_enemy_pid, target_coordinates})
-          |> GenServer.cast({:kill_player, @topic})        
-      end      
+
+      GenServer.call(:maze_server, {:get_enemy_pids, pid, target_coordinates})
+      |> Enum.each(fn pid ->
+        GenServer.cast(pid, {:kill_player, @topic})  
+      end)
+      
+
+      
+      # if GenServer.call(:maze_server, {:get_enemy_pids, pid, target_coordinates}) |> is_pid() do
+      #     GenServer.call(:maze_server, {:get_enemy_pids, pid, target_coordinates})
+      #     |> GenServer.cast({:kill_player, @topic})
+      # end
     end)
      MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
      {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
@@ -208,6 +216,7 @@ defmodule MinoaWeb.Game do
         squares_within_attack_range ++ [translate_coordinates(coordinates, deltas)]
       end
     end)
+    |> Kernel.++([coordinates])
   end
 
   defp get_surrounding_deltas() do

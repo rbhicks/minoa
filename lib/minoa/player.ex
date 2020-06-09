@@ -14,7 +14,7 @@ defmodule Minoa.Player do
         :place_player_randomly,
         _from,
         %{pid: pid, position: {}}=state) do    
-    {x, y} = GenServer.call(:maze_server, :get_random_open_unoccupied_square)
+    {x, y} = GenServer.call(:maze_server, :get_random_open_square)
     {:reply,
      GenServer.call(
        :maze_server,
@@ -27,7 +27,7 @@ defmodule Minoa.Player do
         _from,
         %{pid: pid,
           position: {previous_x, previous_y}}=state) do
-    {x, y} = GenServer.call(:maze_server, :get_random_open_unoccupied_square)
+    {x, y} = GenServer.call(:maze_server, :get_random_open_square)
     {:reply,
      GenServer.call(
        :maze_server,
@@ -147,7 +147,7 @@ defmodule Minoa.Player do
     spawn(fn ->
       Process.sleep(5000)
 
-      {new_x, new_y} = GenServer.call(:maze_server, :get_random_open_unoccupied_square)
+      {new_x, new_y} = GenServer.call(:maze_server, :get_random_open_square)
       
       GenServer.call(
         :maze_server,
