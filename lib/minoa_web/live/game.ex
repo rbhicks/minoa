@@ -127,12 +127,22 @@ defmodule MinoaWeb.Game do
   end
   
   def render(assigns) do
-    coordinates_names = DynamicSupervisor.which_children(Minoa.PlayerSupervisor)
+    names = DynamicSupervisor.which_children(Minoa.PlayerSupervisor)
     |> Enum.reduce(%{}, fn {_, pid, _, _}, acc ->
-      Map.put(
-        acc,
-        GenServer.call(pid, :get_position),
-        GenServer.call(pid, :get_player_name))
+      if(assigns.pid == pid) do
+        # make a key with the current pid so that the current player's
+        # label is the one they see on top (this keeps it from being
+        # overwritten
+        Map.put(
+          acc,
+          {GenServer.call(pid, :get_position), assigns.pid},
+          GenServer.call(pid, :get_player_name))
+      else
+        Map.put(
+          acc,
+          GenServer.call(pid, :get_position),
+          GenServer.call(pid, :get_player_name))
+      end
     end)
     
     ~L"""
@@ -141,7 +151,13 @@ defmodule MinoaWeb.Game do
     <%= for y <- 0..9 do %>
       <%= for x <- 0..9 do %>
         <div class="<%= get_square_class(@pid, @maze[x][y] |> hd()) %>">
-          <%= Map.get(coordinates_names, {x, y}, "") %>
+          <%= 
+            if(Map.has_key?(names, {{x, y}, @pid})) do
+              Map.get(names, {{x, y}, @pid})
+            else
+              Map.get(names, {x, y})
+            end
+          %>
         </div>
       <% end %>
     <% end %>
