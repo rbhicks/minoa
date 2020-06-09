@@ -13,6 +13,8 @@ defmodule Minoa.MazeServer do
     {:ok, generate_maze()}
   end
 
+  # currently only used for testing, but could be
+  # used for future enhancements
   def handle_call(:reset_maze, _from, _maze) do
     maze = generate_maze()
     {:reply, maze, maze}
