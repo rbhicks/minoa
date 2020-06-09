@@ -116,6 +116,20 @@ defmodule Minoa.Player do
   end
 
   def handle_call(
+        :get_position,
+        _from,
+        %{position: {}}=state) do
+    {:reply, nil, state}
+  end
+
+  def handle_call(
+        {:set_position, position},
+        _from,
+        state) do
+    {:reply, position, Map.put(state, :position, position)}
+  end  
+
+  def handle_call(
         :get_player_name,
         _from,
         %{player_name: player_name}=state) do
@@ -123,21 +137,32 @@ defmodule Minoa.Player do
   end
 
   def handle_cast({:kill_player, topic},
-                  %{pid: pid, position: {x, y}}=state) do
+        %{pid: pid, position: {x, y}}=state) do
+
     GenServer.call(
       :maze_server,
       {:remove_player, {x, y}})
+    # launch another process to do the respawn delay
+    # so we don't hold up the player's message queue
+    spawn(fn ->
+      Process.sleep(5000)
 
-    Process.sleep(5000)
+      {new_x, new_y} = GenServer.call(:maze_server, :get_random_open_unoccupied_square)
+      
+      GenServer.call(
+        :maze_server,
+        {:update_player_position, {{}, {new_x, new_y}, pid}})
 
-    {new_x, new_y} = GenServer.call(:maze_server, :get_random_open_unoccupied_square)
+      GenServer.call(
+        pid,
+        {:set_position, {new_x, new_y}})
 
-    GenServer.call(
-       :maze_server,
-       {:update_player_position, {{}, {new_x, new_y}, pid}})
+      MinoaWeb.Endpoint.broadcast_from(self(), topic, "update_board", %{})
+    end)
+     MinoaWeb.Endpoint.broadcast_from(self(), topic, "update_board", %{})
 
-    MinoaWeb.Endpoint.broadcast_from(self(), topic, "update_board", %{})
-
-    {:noreply, Map.put(state, :position, {new_x, new_y})}
+    # having a position of {} will prevent rendering of the
+    # name during the kill delay (which is rendered separately
+    {:noreply, Map.put(state, :position, {})}
   end
 end

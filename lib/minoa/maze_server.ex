@@ -36,7 +36,7 @@ defmodule Minoa.MazeServer do
   
   def handle_call(
         {:remove_player, {x, y}}, _from, maze) do
-    {:reply, maze, put_in(maze[x][y], maze[x][y] |> tl())}
+    {:reply, {x, y}, put_in(maze[x][y], maze[x][y] |> tl())}
   end
   
   def handle_call(

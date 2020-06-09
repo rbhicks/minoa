@@ -113,12 +113,12 @@ defmodule MinoaWeb.Game do
     |> get_squares_within_attack_range()
     |> Enum.each(fn target_coordinates ->
       if GenServer.call(:maze_server, {:get_enemy_pid, target_coordinates}) |> is_pid() do
-        GenServer.call(:maze_server, {:get_enemy_pid, target_coordinates})
-        |> GenServer.cast({:kill_player, @topic})
+          GenServer.call(:maze_server, {:get_enemy_pid, target_coordinates})
+          |> GenServer.cast({:kill_player, @topic})        
       end      
     end)
-    MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
-    {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
+     MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
+     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "update_board",
@@ -129,19 +129,24 @@ defmodule MinoaWeb.Game do
   def render(assigns) do
     names = DynamicSupervisor.which_children(Minoa.PlayerSupervisor)
     |> Enum.reduce(%{}, fn {_, pid, _, _}, acc ->
-      if(assigns.pid == pid) do
-        # make a key with the current pid so that the current player's
-        # label is the one they see on top (this keeps it from being
-        # overwritten
-        Map.put(
-          acc,
-          {GenServer.call(pid, :get_position), assigns.pid},
-          GenServer.call(pid, :get_player_name))
+
+      if(GenServer.call(pid, :get_position)) do
+        if(assigns.pid == pid) do
+          # make a key with the current pid so that the current player's
+          # label is the one they see on top (this keeps it from being
+          # overwritten
+          Map.put(
+            acc,
+            {GenServer.call(pid, :get_position), assigns.pid},
+            GenServer.call(pid, :get_player_name))
+        else
+          Map.put(
+            acc,
+            GenServer.call(pid, :get_position),
+            GenServer.call(pid, :get_player_name))
+        end
       else
-        Map.put(
-          acc,
-          GenServer.call(pid, :get_position),
-          GenServer.call(pid, :get_player_name))
+        acc
       end
     end)
     
