@@ -42,6 +42,12 @@ defmodule MinoaWeb.Game do
     MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
+
+  def handle_event("left",
+        _,
+        %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
+    {:noreply, socket}
+  end
   
   def handle_event("left",
         _,
@@ -53,12 +59,24 @@ defmodule MinoaWeb.Game do
 
   def handle_event("down",
         _,
+        %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
+    {:noreply, socket}
+  end
+  
+  def handle_event("down",
+        _,
         %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
     GenServer.call(pid, {:move_player, "down"})
     MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
 
+  def handle_event("up",
+        _,
+        %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
+    {:noreply, socket}
+  end
+  
   def handle_event("up",
         _,
         %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
@@ -69,12 +87,24 @@ defmodule MinoaWeb.Game do
 
   def handle_event("right",
         _,
+        %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
+    {:noreply, socket}
+  end
+  
+  def handle_event("right",
+        _,
         %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
     GenServer.call(pid, {:move_player, "right"})
     MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
 
+  def handle_event("attack",
+        _,
+        %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
+    {:noreply, socket}
+  end
+  
   def handle_event("attack",
         _,
         %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
