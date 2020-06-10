@@ -1,6 +1,5 @@
 defmodule MazeServerTest do
 
-  #  use ExUnit.Case, async: true
   use ExSpec, async: true
 
   setup do
