@@ -133,6 +133,11 @@ defmodule MazeServerTest do
         assert single_enemy == [enemy_0_pid]
         assert two_enemies  == [enemy_2_pid, enemy_1_pid]
       end
+
+      it ":closed_square? works for a closed and an open square" do
+        assert GenServer.call(:maze_server, {:closed_square?, {0, 0}})
+        refute GenServer.call(:maze_server, {:closed_square?, {1, 1}})
+      end
     end
   end    
 
