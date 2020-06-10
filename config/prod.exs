@@ -16,6 +16,12 @@ config :minoa, MinoaWeb.Endpoint,
 # Do not print debug messages in production
 config :logger, level: :info
 
+config :minoa, MinoaWeb.Endpoint,
+  http: [port: {:system, "PORT"}], # Possibly not needed, but doesn't hurt
+  url: [nil, port: 80],
+  secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE"),
+  server: true
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key
