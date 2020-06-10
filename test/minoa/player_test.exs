@@ -1,6 +1,6 @@
 defmodule PlayerTest do
 
-  use ExSpec, async: true
+  use ExSpec, async: false
 
   describe "the maze server" do
     context "the placement and movement handlers:" do

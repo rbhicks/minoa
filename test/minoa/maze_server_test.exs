@@ -1,6 +1,6 @@
 defmodule MazeServerTest do
 
-  use ExSpec, async: true
+  use ExSpec, async: false
 
   setup do
     on_exit fn ->
