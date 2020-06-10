@@ -112,18 +112,10 @@ defmodule MinoaWeb.Game do
     |> GenServer.call(:get_position)
     |> get_squares_within_attack_range()
     |> Enum.each(fn target_coordinates ->
-
       GenServer.call(:maze_server, {:get_enemy_pids, pid, target_coordinates})
       |> Enum.each(fn pid ->
         GenServer.cast(pid, {:kill_player, @topic})  
       end)
-      
-
-      
-      # if GenServer.call(:maze_server, {:get_enemy_pids, pid, target_coordinates}) |> is_pid() do
-      #     GenServer.call(:maze_server, {:get_enemy_pids, pid, target_coordinates})
-      #     |> GenServer.cast({:kill_player, @topic})
-      # end
     end)
      MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
      {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
@@ -137,7 +129,6 @@ defmodule MinoaWeb.Game do
   def render(assigns) do
     names = DynamicSupervisor.which_children(Minoa.PlayerSupervisor)
     |> Enum.reduce(%{}, fn {_, pid, _, _}, acc ->
-
       if(GenServer.call(pid, :get_position)) do
         if(assigns.pid == pid) do
           # make a key with the current pid so that the current player's
@@ -157,7 +148,7 @@ defmodule MinoaWeb.Game do
         acc
       end
     end)
-    
+
     ~L"""
     <main>
     <section class="maze">
