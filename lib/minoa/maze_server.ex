@@ -30,8 +30,8 @@ defmodule Minoa.MazeServer do
 
   # there might not be one, but returning [] when there isn't
   # allows us to only check the surrounding squares
-  def handle_call({:get_enemy_pids, pid, {x, y}}, _from, maze) do    
-    {:reply, get_enemy_pids(x, y, maze, pid), maze}
+  def handle_call({:get_enemy_pids, player_pid, {x, y}}, _from, maze) do    
+    {:reply, get_enemy_pids(x, y, maze, player_pid), maze}
   end
   
   def handle_call(
