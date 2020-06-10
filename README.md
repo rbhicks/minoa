@@ -1,19 +1,32 @@
 # Minoa
 
-To start your Phoenix server:
+## Install & Run
 
-  * Install dependencies with `mix deps.get`
-  * Install Node.js dependencies with `npm install` inside the `assets` directory
-  * Start Phoenix endpoint with `mix phx.server`
+### Common
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+* clone this repository
+* `cd minoa`
+* `mix setup`
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+### Production
 
-## Learn more
+* `MIX_ENV=prod mix compile`
+* `npm run deploy --prefix ./assets`
+* `mix phx.digest && export SECRET_KEY_BASE=$(mix phx.gen.secret) && MIX_ENV=prod mix phx.server`
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+### Development
+
+* `mix phx.server`
+
+## Testing
+
+* `mix test`
+
+N.B.:
+
+* Formatting: `mix format` has been run
+* I'd look at removing parens where possible/clearer
+* local variables have been avoided in many places, but in a couple this results in the same function call multiple times; I'd look into if this is a performance problem and/or is it really cleaner
+* I'd change the name "maze" to "board"
+* some functions could be renamed for clarity
+* even though variable names are long and descriptive, more comments and module docs would be better
