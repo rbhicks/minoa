@@ -121,5 +121,6 @@ defmodule Minoa.MazeServer do
         end
       end
     end)
+    |> Enum.filter(&(&1 != nil))
   end
 end
