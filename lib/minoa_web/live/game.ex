@@ -5,149 +5,183 @@ defmodule MinoaWeb.Game do
 
   def mount(_params, _session, socket) do
     MinoaWeb.Endpoint.subscribe(@topic)
-    {:ok, assign(socket,
-                 maze: GenServer.call(:maze_server, :get_maze),
-                 pid: nil)}
+
+    {:ok,
+     assign(socket,
+       maze: GenServer.call(:maze_server, :get_maze),
+       pid: nil
+     )}
   end
 
   def handle_event(
         "start",
         %{"player_name" => player_name},
-        %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
+        %Phoenix.LiveView.Socket{assigns: %{pid: nil}} = socket
+      ) do
     if(GenServer.whereis({:global, player_name})) do
       {:noreply,
        assign(
          socket,
          pid: GenServer.whereis({:global, player_name}),
          maze: GenServer.call(:maze_server, :get_maze),
-         player_name: player_name)}
-    else      
+         player_name: player_name
+       )}
+    else
       {:ok, pid} = Minoa.PlayerSupervisor.start_player(player_name)
       GenServer.call(pid, :place_player_randomly)
       MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
+
       {:noreply,
        assign(
          socket,
          pid: pid,
          maze: GenServer.call(:maze_server, :get_maze),
-         player_name: player_name)}
+         player_name: player_name
+       )}
     end
   end
 
   def handle_event(
         "start",
         _,
-        %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
+        %Phoenix.LiveView.Socket{assigns: %{pid: pid}} = socket
+      ) do
     GenServer.call(pid, :place_player_randomly)
     MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
 
-  def handle_event("left",
+  def handle_event(
+        "left",
         _,
-        %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
+        %Phoenix.LiveView.Socket{assigns: %{pid: nil}} = socket
+      ) do
     {:noreply, socket}
   end
-  
-  def handle_event("left",
+
+  def handle_event(
+        "left",
         _,
-        %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
+        %Phoenix.LiveView.Socket{assigns: %{pid: pid}} = socket
+      ) do
     GenServer.call(pid, {:move_player, "left"})
     MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
 
-  def handle_event("down",
+  def handle_event(
+        "down",
         _,
-        %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
+        %Phoenix.LiveView.Socket{assigns: %{pid: nil}} = socket
+      ) do
     {:noreply, socket}
   end
-  
-  def handle_event("down",
+
+  def handle_event(
+        "down",
         _,
-        %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
+        %Phoenix.LiveView.Socket{assigns: %{pid: pid}} = socket
+      ) do
     GenServer.call(pid, {:move_player, "down"})
     MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
 
-  def handle_event("up",
+  def handle_event(
+        "up",
         _,
-        %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
+        %Phoenix.LiveView.Socket{assigns: %{pid: nil}} = socket
+      ) do
     {:noreply, socket}
   end
-  
-  def handle_event("up",
+
+  def handle_event(
+        "up",
         _,
-        %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
+        %Phoenix.LiveView.Socket{assigns: %{pid: pid}} = socket
+      ) do
     GenServer.call(pid, {:move_player, "up"})
     MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
 
-  def handle_event("right",
+  def handle_event(
+        "right",
         _,
-        %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
+        %Phoenix.LiveView.Socket{assigns: %{pid: nil}} = socket
+      ) do
     {:noreply, socket}
   end
-  
-  def handle_event("right",
+
+  def handle_event(
+        "right",
         _,
-        %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
+        %Phoenix.LiveView.Socket{assigns: %{pid: pid}} = socket
+      ) do
     GenServer.call(pid, {:move_player, "right"})
     MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
 
-  def handle_event("attack",
+  def handle_event(
+        "attack",
         _,
-        %Phoenix.LiveView.Socket{assigns: %{pid: nil}}=socket) do
+        %Phoenix.LiveView.Socket{assigns: %{pid: nil}} = socket
+      ) do
     {:noreply, socket}
   end
-  
-  def handle_event("attack",
+
+  def handle_event(
+        "attack",
         _,
-        %Phoenix.LiveView.Socket{assigns: %{pid: pid}}=socket) do
+        %Phoenix.LiveView.Socket{assigns: %{pid: pid}} = socket
+      ) do
     pid
     |> GenServer.call(:get_position)
     |> get_squares_within_attack_range()
     |> Enum.each(fn target_coordinates ->
       GenServer.call(:maze_server, {:get_enemy_pids, pid, target_coordinates})
       |> Enum.each(fn pid ->
-        GenServer.cast(pid, {:kill_player, @topic})  
+        GenServer.cast(pid, {:kill_player, @topic})
       end)
     end)
-     MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
-     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
-  end
 
-  def handle_info(%Phoenix.Socket.Broadcast{event: "update_board",
-                                            topic: @topic}, socket) do
+    MinoaWeb.Endpoint.broadcast_from(self(), @topic, "update_board", %{})
     {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
   end
-  
+
+  def handle_info(
+        %Phoenix.Socket.Broadcast{event: "update_board", topic: @topic},
+        socket
+      ) do
+    {:noreply, assign(socket, maze: GenServer.call(:maze_server, :get_maze))}
+  end
+
   def render(assigns) do
-    names = DynamicSupervisor.which_children(Minoa.PlayerSupervisor)
-    |> Enum.reduce(%{}, fn {_, pid, _, _}, acc ->
-      if(GenServer.call(pid, :get_position)) do
-        if(assigns.pid == pid) do
-          # make a key with the current pid so that the current player's
-          # label is the one they see on top (this keeps it from being
-          # overwritten
-          Map.put(
-            acc,
-            {GenServer.call(pid, :get_position), assigns.pid},
-            GenServer.call(pid, :get_player_name))
+    names =
+      DynamicSupervisor.which_children(Minoa.PlayerSupervisor)
+      |> Enum.reduce(%{}, fn {_, pid, _, _}, acc ->
+        if(GenServer.call(pid, :get_position)) do
+          if(assigns.pid == pid) do
+            # make a key with the current pid so that the current player's
+            # label is the one they see on top (this keeps it from being
+            # overwritten
+            Map.put(
+              acc,
+              {GenServer.call(pid, :get_position), assigns.pid},
+              GenServer.call(pid, :get_player_name)
+            )
+          else
+            Map.put(
+              acc,
+              GenServer.call(pid, :get_position),
+              GenServer.call(pid, :get_player_name)
+            )
+          end
         else
-          Map.put(
-            acc,
-            GenServer.call(pid, :get_position),
-            GenServer.call(pid, :get_player_name))
+          acc
         end
-      else
-        acc
-      end
-    end)
+      end)
 
     ~L"""
     <main>
@@ -199,9 +233,10 @@ defmodule MinoaWeb.Game do
   defp get_squares_within_attack_range(coordinates) do
     get_surrounding_deltas()
     |> Enum.reduce([], fn deltas, squares_within_attack_range ->
-      if GenServer.call(:maze_server,
-                        {:closed_square?,
-                        translate_coordinates(coordinates, deltas)}) do
+      if GenServer.call(
+           :maze_server,
+           {:closed_square?, translate_coordinates(coordinates, deltas)}
+         ) do
         squares_within_attack_range
       else
         squares_within_attack_range ++ [translate_coordinates(coordinates, deltas)]
@@ -212,13 +247,13 @@ defmodule MinoaWeb.Game do
 
   defp get_surrounding_deltas() do
     [
-      {0,  -1},
-      {1,  -1},
-      {1,   0},
-      {1,   1},
-      {0,   1},
-      {-1,  1},
-      {-1,  0},
+      {0, -1},
+      {1, -1},
+      {1, 0},
+      {1, 1},
+      {0, 1},
+      {-1, 1},
+      {-1, 0},
       {-1, -1}
     ]
   end
@@ -227,5 +262,4 @@ defmodule MinoaWeb.Game do
     {coordinates |> elem(0) |> Kernel.+(deltas |> elem(0)),
      coordinates |> elem(1) |> Kernel.+(deltas |> elem(1))}
   end
-  
 end

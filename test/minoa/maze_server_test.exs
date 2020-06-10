@@ -1,11 +1,10 @@
 defmodule MazeServerTest do
-
   use ExSpec, async: false
 
   setup do
-    on_exit fn ->
+    on_exit(fn ->
       GenServer.call(:maze_server, :reset_maze)
-    end
+    end)
 
     {:ok, initial_maze: GenServer.call(:maze_server, :get_maze)}
   end
@@ -38,51 +37,49 @@ defmodule MazeServerTest do
         verify_internal_open_square_structure(GenServer.call(:maze_server, :reset_maze))
       end
     end
-    
+
     context "by placing and removing players:" do
       it "updating a player position and retrieving the maze should show the player in that postion" do
-
         player_position_x = 3
         player_position_y = 3
         pid = self()
 
         GenServer.call(
           :maze_server,
-          {:update_player_position,
-           {{}, {player_position_x, player_position_y},
-            pid}})
+          {:update_player_position, {{}, {player_position_x, player_position_y}, pid}}
+        )
 
-        assert GenServer.call(:maze_server, :get_maze)[player_position_x][player_position_y] |> hd() == pid
+        assert GenServer.call(:maze_server, :get_maze)[player_position_x][player_position_y]
+               |> hd() == pid
       end
 
       it "updating a player position, removening it, and retrieving the maze should show the postion empty" do
-
         player_position_x = 3
         player_position_y = 3
         pid = self()
 
         GenServer.call(
           :maze_server,
-          {:update_player_position,
-           {{}, {player_position_x, player_position_y},
-            pid}})
+          {:update_player_position, {{}, {player_position_x, player_position_y}, pid}}
+        )
 
         GenServer.call(
           :maze_server,
-          {:remove_player,
-           {player_position_x, player_position_y}, pid})
+          {:remove_player, {player_position_x, player_position_y}, pid}
+        )
 
-        assert GenServer.call(:maze_server, :get_maze)[player_position_x][player_position_y] |> hd() == "open-square"
+        assert GenServer.call(:maze_server, :get_maze)[player_position_x][player_position_y]
+               |> hd() == "open-square"
       end
     end
 
     context "checking informational message handlers:" do
       it ":get_random_open_square provides open squares at least 10000 times in a row in the default maze",
-        %{initial_maze: maze} do
+         %{initial_maze: maze} do
         Enum.each(0..9999, fn _ ->
           {x, y} = GenServer.call(:maze_server, :get_random_open_square)
           assert maze[x][y] |> hd() != "closed-square"
-        end)        
+        end)
       end
 
       it ":get_random_open_square provides open squares at least 10000 times in a row in an updated maze" do
@@ -92,10 +89,9 @@ defmodule MazeServerTest do
 
         GenServer.call(
           :maze_server,
-          {:update_player_position,
-           {{}, {player_position_x, player_position_y},
-            enemy_pid}})
-        
+          {:update_player_position, {{}, {player_position_x, player_position_y}, enemy_pid}}
+        )
+
         updated_maze = GenServer.call(:maze_server, :get_maze)
 
         Enum.each(0..9999, fn _ ->
@@ -108,29 +104,28 @@ defmodule MazeServerTest do
         {:ok, enemy_0_pid} = Minoa.PlayerSupervisor.start_player(Faker.Nato.callsign())
         {:ok, enemy_1_pid} = Minoa.PlayerSupervisor.start_player(Faker.Nato.callsign())
         {:ok, enemy_2_pid} = Minoa.PlayerSupervisor.start_player(Faker.Nato.callsign())
-        {:ok, player_pid}  = Minoa.PlayerSupervisor.start_player(Faker.Nato.callsign())
+        {:ok, player_pid} = Minoa.PlayerSupervisor.start_player(Faker.Nato.callsign())
 
         GenServer.call(
           :maze_server,
-          {:update_player_position,
-           {{}, {1, 1},
-            enemy_0_pid}})
+          {:update_player_position, {{}, {1, 1}, enemy_0_pid}}
+        )
+
         GenServer.call(
           :maze_server,
-          {:update_player_position,
-           {{}, {2, 2},
-            enemy_1_pid}})
+          {:update_player_position, {{}, {2, 2}, enemy_1_pid}}
+        )
+
         GenServer.call(
           :maze_server,
-          {:update_player_position,
-           {{}, {2, 2},
-            enemy_2_pid}})
-        
+          {:update_player_position, {{}, {2, 2}, enemy_2_pid}}
+        )
+
         single_enemy = GenServer.call(:maze_server, {:get_enemy_pids, player_pid, {1, 1}})
-        two_enemies  = GenServer.call(:maze_server, {:get_enemy_pids, player_pid, {2, 2}})
+        two_enemies = GenServer.call(:maze_server, {:get_enemy_pids, player_pid, {2, 2}})
 
         assert single_enemy == [enemy_0_pid]
-        assert two_enemies  == [enemy_2_pid, enemy_1_pid]
+        assert two_enemies == [enemy_2_pid, enemy_1_pid]
       end
 
       it ":closed_square? works for a closed and an open square" do
@@ -138,10 +133,9 @@ defmodule MazeServerTest do
         refute GenServer.call(:maze_server, {:closed_square?, {1, 1}})
       end
     end
-  end    
+  end
 
   defp verify_outer_border(maze) do
-
     # leftmost column
     assert maze[0][0] |> hd() == "closed-square"
     assert maze[0][1] |> hd() == "closed-square"
@@ -164,7 +158,7 @@ defmodule MazeServerTest do
     assert maze[6][0] |> hd() == "closed-square"
     assert maze[7][0] |> hd() == "closed-square"
     assert maze[8][0] |> hd() == "closed-square"
-    
+
     # bottom row (without the ends that are
     # tested with the columns)
     assert maze[1][9] |> hd() == "closed-square"
@@ -239,7 +233,7 @@ defmodule MazeServerTest do
     assert maze[6][5] |> hd() == "open-square"
     assert maze[7][5] |> hd() == "open-square"
     assert maze[8][5] |> hd() == "open-square"
-        
+
     assert maze[1][6] |> hd() == "open-square"
     assert maze[2][6] |> hd() == "open-square"
     assert maze[3][6] |> hd() == "open-square"
@@ -255,7 +249,7 @@ defmodule MazeServerTest do
     assert maze[6][7] |> hd() == "open-square"
     assert maze[7][7] |> hd() == "open-square"
     assert maze[8][7] |> hd() == "open-square"
-        
+
     assert maze[1][8] |> hd() == "open-square"
     assert maze[2][8] |> hd() == "open-square"
     assert maze[3][8] |> hd() == "open-square"

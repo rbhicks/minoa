@@ -1,7 +1,6 @@
 defmodule Minoa.PlayerSupervisor do
   use DynamicSupervisor
 
-  
   def start_link(_args) do
     DynamicSupervisor.start_link(__MODULE__, :ok, name: __MODULE__)
   end

@@ -6,10 +6,9 @@ defmodule Minoa.Application do
   use Application
 
   def start(_type, _args) do
-
     # we use Faker everywhere, so start it here
     Faker.start()
-    
+
     children = [
       # Start the Telemetry supervisor
       MinoaWeb.Telemetry,

@@ -4,7 +4,6 @@ defmodule Minoa.MazeServer do
 
   use GenServer
 
-
   def start_link(_args) do
     GenServer.start_link(__MODULE__, [], name: :maze_server)
   end
@@ -19,7 +18,7 @@ defmodule Minoa.MazeServer do
     maze = generate_maze()
     {:reply, maze, maze}
   end
-  
+
   def handle_call(:get_maze, _from, maze) do
     {:reply, maze, maze}
   end
@@ -30,36 +29,40 @@ defmodule Minoa.MazeServer do
 
   # there might not be one, but returning [] when there isn't
   # allows us to only check the surrounding squares
-  def handle_call({:get_enemy_pids, player_pid, {x, y}}, _from, maze) do    
+  def handle_call({:get_enemy_pids, player_pid, {x, y}}, _from, maze) do
     {:reply, get_enemy_pids(x, y, maze, player_pid), maze}
   end
-  
+
   def handle_call(
-        {:remove_player, {x, y}, pid}, _from, maze) do
+        {:remove_player, {x, y}, pid},
+        _from,
+        maze
+      ) do
     {:reply, {x, y}, put_in(maze[x][y], maze[x][y] |> List.delete(pid))}
   end
-  
+
   def handle_call(
         {:update_player_position, {{}, {x, y}, pid}},
         _from,
-        maze) do
-    {:reply, {x, y}, put_in(maze[x][y], [pid| maze[x][y]])}
+        maze
+      ) do
+    {:reply, {x, y}, put_in(maze[x][y], [pid | maze[x][y]])}
   end
 
   def handle_call(
-        {:update_player_position,
-         {{previous_x, previous_y}, {x, y}, pid}},
+        {:update_player_position, {{previous_x, previous_y}, {x, y}, pid}},
         _from,
-        maze) do
+        maze
+      ) do
     maze = put_in(maze[previous_x][previous_y], maze[previous_x][previous_y] |> tl())
-    {:reply, {x, y}, put_in(maze[x][y], [pid| maze[x][y]])}
+    {:reply, {x, y}, put_in(maze[x][y], [pid | maze[x][y]])}
   end
 
   def handle_call(
-        {:closed_square?,
-         {x, y}},
+        {:closed_square?, {x, y}},
         _from,
-        maze) do
+        maze
+      ) do
     {:reply, closed_square?(x, y), maze}
   end
 
@@ -72,12 +75,14 @@ defmodule Minoa.MazeServer do
           Map.put(
             column,
             y,
-            [get_square_type(x, y)])
-        end))
+            [get_square_type(x, y)]
+          )
+        end)
+      )
     end)
   end
 
-  defp get_square_type(x, y) do    
+  defp get_square_type(x, y) do
     if(closed_square?(x, y)) do
       "closed-square"
     else
@@ -101,15 +106,15 @@ defmodule Minoa.MazeServer do
   defp get_random_open_square do
     Enum.random(1..8)
     |> case do
-         1 -> {1, 1..8 |> Enum.to_list |> Kernel.--([4]) |> Enum.random}
-         2 -> {2, 1..8 |> Enum.to_list |> Enum.random}
-         3 -> {3, 1..8 |> Enum.to_list |> Kernel.--([4]) |> Enum.random}
-         4 -> {4, 1..8 |> Enum.to_list |> Kernel.--([4, 5, 6, 7]) |> Enum.random}
-         5 -> {5, 1..8 |> Enum.to_list |> Kernel.--([4]) |> Enum.random}
-         6 -> {6, 1..8 |> Enum.to_list |> Kernel.--([4]) |> Enum.random}
-         7 -> {7, 1..8 |> Enum.to_list |> Enum.random}
-         8 -> {8, 1..8 |> Enum.to_list |> Enum.random}
-       end
+      1 -> {1, 1..8 |> Enum.to_list() |> Kernel.--([4]) |> Enum.random()}
+      2 -> {2, 1..8 |> Enum.to_list() |> Enum.random()}
+      3 -> {3, 1..8 |> Enum.to_list() |> Kernel.--([4]) |> Enum.random()}
+      4 -> {4, 1..8 |> Enum.to_list() |> Kernel.--([4, 5, 6, 7]) |> Enum.random()}
+      5 -> {5, 1..8 |> Enum.to_list() |> Kernel.--([4]) |> Enum.random()}
+      6 -> {6, 1..8 |> Enum.to_list() |> Kernel.--([4]) |> Enum.random()}
+      7 -> {7, 1..8 |> Enum.to_list() |> Enum.random()}
+      8 -> {8, 1..8 |> Enum.to_list() |> Enum.random()}
+    end
   end
 
   defp get_enemy_pids(x, y, maze, player_pid) do
