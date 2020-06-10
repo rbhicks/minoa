@@ -141,7 +141,7 @@ defmodule Minoa.Player do
 
     GenServer.call(
       :maze_server,
-      {:remove_player, {x, y}})
+      {:remove_player, {x, y}, pid})
     # launch another process to do the respawn delay
     # so we don't hold up the player's message queue
     spawn(fn ->
