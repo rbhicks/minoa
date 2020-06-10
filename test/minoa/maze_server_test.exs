@@ -82,11 +82,11 @@ defmodule MazeServerTest do
         %{initial_maze: maze} do
         Enum.each(0..9999, fn _ ->
           {x, y} = GenServer.call(:maze_server, :get_random_open_square)
-          assert maze[x][y] |> hd() == "open-square"          
+          assert maze[x][y] |> hd() != "closed-square"
         end)        
       end
 
-      it ":get_random_open_square provides open squares at least 10000 times in a row in an updated maze" do        
+      it ":get_random_open_square provides open squares at least 10000 times in a row in an updated maze" do
         player_position_x = 3
         player_position_y = 3
         {:ok, enemy_pid} = Minoa.PlayerSupervisor.start_player(Faker.Nato.callsign())
@@ -101,7 +101,7 @@ defmodule MazeServerTest do
 
         Enum.each(0..9999, fn _ ->
           {x, y} = GenServer.call(:maze_server, :get_random_open_square)
-          assert updated_maze[x][y] |> hd() == "open-square"          
+          assert updated_maze[x][y] |> hd() != "closed-square"
         end)
       end
     end
