@@ -104,6 +104,35 @@ defmodule MazeServerTest do
           assert updated_maze[x][y] |> hd() != "closed-square"
         end)
       end
+
+      it ":get_enemy_pids returns all other players pids" do
+        {:ok, enemy_0_pid} = Minoa.PlayerSupervisor.start_player(Faker.Nato.callsign())
+        {:ok, enemy_1_pid} = Minoa.PlayerSupervisor.start_player(Faker.Nato.callsign())
+        {:ok, enemy_2_pid} = Minoa.PlayerSupervisor.start_player(Faker.Nato.callsign())
+        {:ok, player_pid}  = Minoa.PlayerSupervisor.start_player(Faker.Nato.callsign())
+
+        GenServer.call(
+          :maze_server,
+          {:update_player_position,
+           {{}, {1, 1},
+            enemy_0_pid}})
+        GenServer.call(
+          :maze_server,
+          {:update_player_position,
+           {{}, {2, 2},
+            enemy_1_pid}})
+        GenServer.call(
+          :maze_server,
+          {:update_player_position,
+           {{}, {2, 2},
+            enemy_2_pid}})
+        
+        single_enemy = GenServer.call(:maze_server, {:get_enemy_pids, player_pid, {1, 1}})
+        two_enemies  = GenServer.call(:maze_server, {:get_enemy_pids, player_pid, {2, 2}})
+
+        assert single_enemy == [enemy_0_pid]
+        assert two_enemies  == [enemy_2_pid, enemy_1_pid]
+      end
     end
   end    
 
